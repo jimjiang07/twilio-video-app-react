@@ -22,6 +22,8 @@ export default function useClipShareToggle() {
 
       const tracks = stream.getTracks();
 
+      console.log(tracks);
+
       console.log(stream.getTracks());
 
       // All video tracks are published with 'low' priority. This works because the video

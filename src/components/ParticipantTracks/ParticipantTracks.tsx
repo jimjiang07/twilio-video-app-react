@@ -1,4 +1,5 @@
 import React from 'react';
+import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import { Participant, Track } from 'twilio-video';
 import Publication from '../Publication/Publication';
 import usePublications from '../../hooks/usePublications/usePublications';
@@ -10,6 +11,16 @@ interface ParticipantTracksProps {
   enableScreenShare?: boolean;
   videoPriority?: Track.Priority | null;
 }
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    testMainP: {
+      display: 'flex',
+      flexDirection: 'column',
+      position: 'relative',
+    },
+  })
+);
 
 /*
  *  The object model for the Room object (found here: https://www.twilio.com/docs/video/migrating-1x-2x#object-model) shows
@@ -25,6 +36,7 @@ export default function ParticipantTracks({
   enableScreenShare,
   videoPriority,
 }: ParticipantTracksProps) {
+  const classes = useStyles();
   const { room } = useVideoContext();
   const publications = usePublications(participant);
   const isLocal = participant === room.localParticipant;
@@ -37,11 +49,13 @@ export default function ParticipantTracks({
     filteredPublications = publications.filter(p => !p.trackName.includes('screen'));
   }
 
+  console.log('filteredPublications.length:', filteredPublications, filteredPublications.length);
+
   return (
-    <>
-      {filteredPublications.map(publication => (
+    <div className={classes.testMainP}>
+      {filteredPublications.slice(0, 2).map((publication, index) => (
         <Publication
-          key={publication.kind}
+          key={`${publication.kind}-${index}`}
           publication={publication}
           participant={participant}
           isLocal={isLocal}
@@ -49,6 +63,26 @@ export default function ParticipantTracks({
           videoPriority={videoPriority}
         />
       ))}
-    </>
+      {filteredPublications.slice(2).map((publication, index) => (
+        <div
+          style={{
+            position: 'absolute',
+            width: 250,
+            height: 'auto',
+            top: 79,
+            right: 41,
+          }}
+        >
+          <Publication
+            key={`${publication.kind}-${index}`}
+            publication={publication}
+            participant={participant}
+            isLocal={isLocal}
+            disableAudio={disableAudio}
+            videoPriority={videoPriority}
+          />
+        </div>
+      ))}
+    </div>
   );
 }

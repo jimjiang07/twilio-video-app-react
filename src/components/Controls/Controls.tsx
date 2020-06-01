@@ -6,6 +6,7 @@ import EndCallButton from './EndCallButton/EndCallButton';
 import ToggleAudioButton from './ToggleAudioButton/ToggleAudioButton';
 import ToggleVideoButton from './ToggleVideoButton/ToggleVideoButton';
 import ToggleScreenShareButton from './ToogleScreenShareButton/ToggleScreenShareButton';
+import ToggleClipShareButton from './ToggleClipShareButton/ToggleClipShareButton';
 
 import useIsUserActive from './useIsUserActive/useIsUserActive';
 import useRoomState from '../../hooks/useRoomState/useRoomState';
@@ -50,6 +51,7 @@ export default function Controls() {
       {roomState !== 'disconnected' && (
         <>
           <ToggleScreenShareButton disabled={isReconnecting} />
+          <ToggleClipShareButton />
           <EndCallButton />
         </>
       )}
