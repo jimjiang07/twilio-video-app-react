@@ -2,8 +2,8 @@ import React from 'react';
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 
 import Fab from '@material-ui/core/Fab';
-import ScreenShare from '@material-ui/icons/ScreenShare';
-import StopScreenShare from '@material-ui/icons/StopScreenShare';
+import PresentToAll from '@material-ui/icons/PresentToAll';
+import CancelPresentation from '@material-ui/icons/CancelPresentation';
 import Tooltip from '@material-ui/core/Tooltip';
 
 import useClipShareToggle from '../../../hooks/useClipShareToggle/useClipShareToggle';
@@ -30,12 +30,12 @@ export default function ToggleClipShareButton(props: { disabled?: boolean }) {
   const [isClipShared, toggleClipShare] = useClipShareToggle();
 
   return (
-    <Tooltip title={'clip'} placement="top" PopperProps={{ disablePortal: true }} style={{ cursor: 'pointer' }}>
+    <Tooltip title={'Present Clip'} placement="top" PopperProps={{ disablePortal: true }} style={{ cursor: 'pointer' }}>
       <div>
         {/* The div element is needed because a disabled button will not emit hover events and we want to display
           a tooltip when screen sharing is disabled */}
         <Fab className={classes.fab} onClick={toggleClipShare}>
-          {isClipShared ? <StopScreenShare /> : <ScreenShare />}
+          {isClipShared ? <CancelPresentation /> : <PresentToAll />}
         </Fab>
       </div>
     </Tooltip>

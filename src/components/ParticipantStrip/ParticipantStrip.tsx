@@ -32,7 +32,7 @@ export default function ParticipantStrip() {
   const { status, startRecording, stopRecording, mediaBlobUrl } = useReactMediaRecorder({
     audio: true,
     video: {
-      facingMode: 'right',
+      facingMode: 'user',
     },
   });
 

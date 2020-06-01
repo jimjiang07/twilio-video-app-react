@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import useVideoContext from '../useVideoContext/useVideoContext';
-import { LogLevels, Track } from 'twilio-video';
+import { LogLevels, Track, TrackPublication } from 'twilio-video';
 
 interface MediaStreamTrackPublishOptions {
   name?: string;
@@ -10,10 +10,31 @@ interface MediaStreamTrackPublishOptions {
 
 export default function useClipShareToggle() {
   const { room, onError } = useVideoContext();
-  const [isSharing] = useState(false);
-  const stopClipShareRef = useRef<() => void>(null!);
+  const [isSharing, setIsSharing] = useState(false);
+  const stopClipShareRef = useRef<Array<() => void>>([]);
 
-  const shareScreen = useCallback(() => {
+  const stopAll = () => {
+    console.log(stopClipShareRef.current);
+    stopClipShareRef.current.forEach((fn: () => void) => {
+      console.log('calling fn');
+      fn();
+    });
+    stopClipShareRef.current = [];
+    setIsSharing(false);
+  };
+
+  const stopShare = useCallback(
+    (track: MediaStreamTrack, trackPublication: TrackPublication) => {
+      console.log('unpublishing track', track.label, track.kind);
+      room.localParticipant.unpublishTrack(track);
+      // TODO: remove this if the SDK is updated to emit this event
+      room.localParticipant.emit('trackUnpublished', trackPublication);
+      track.stop();
+    },
+    [room.localParticipant]
+  );
+
+  const shareClip = useCallback(() => {
     const clip: HTMLMediaElement | null = document.querySelector('video#recorded_clip');
     let stream;
 
@@ -21,23 +42,27 @@ export default function useClipShareToggle() {
       stream = clip.captureStream();
 
       const tracks = stream.getTracks();
+      tracks.forEach(track => {
+        room.localParticipant
+          .publishTrack(track, {
+            name: `clip-${track.kind}`,
+          } as MediaStreamTrackPublishOptions)
+          .then(trackPublication => {
+            stopClipShareRef.current.push(stopShare.bind(null, track, trackPublication));
 
-      console.log(tracks);
+            console.log(stopClipShareRef.current.length);
 
-      console.log(stream.getTracks());
-
-      // All video tracks are published with 'low' priority. This works because the video
-      // track that is displayed in the 'MainParticipant' component will have it's priority
-      // set to 'high' via track.setPriority()
-      room.localParticipant.publishTracks(tracks).catch(onError);
-
-      console.log(room.localParticipant);
+            track.onended = stopAll;
+            setIsSharing(true);
+          })
+          .catch(onError);
+      });
     }
-  }, [room, onError]);
+  }, [room, onError, stopShare]);
 
   const toggleClipShare = useCallback(() => {
-    !isSharing ? shareScreen() : stopClipShareRef.current();
-  }, [isSharing, shareScreen, stopClipShareRef]);
+    !isSharing ? shareClip() : stopAll();
+  }, [isSharing, shareClip]);
 
   return [isSharing, toggleClipShare] as const;
 }
