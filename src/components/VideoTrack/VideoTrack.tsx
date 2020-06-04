@@ -1,12 +1,22 @@
 import React, { useRef, useEffect } from 'react';
 import { IVideoTrack } from '../../types';
-import { styled } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import { Track } from 'twilio-video';
 
-const Video = styled('video')({
-  width: '100%',
-  maxHeight: '100%',
-  objectFit: 'contain',
+const useStyles = makeStyles({
+  VideoBase: {
+    width: '100%',
+    maxHeight: '100%',
+    objectFit: 'contain',
+    transform: 'rotateY(180deg)',
+  },
+  VideoClip: {
+    position: 'absolute',
+    width: '49%',
+    right: '0',
+    top: '0',
+    border: '5px solid',
+  },
 });
 
 interface VideoTrackProps {
@@ -35,8 +45,8 @@ export default function VideoTrack({ track, isLocal, priority }: VideoTrackProps
   }, [track, priority]);
 
   // The local video track is mirrored.
-  const isFrontFacing = track.mediaStreamTrack.getSettings().facingMode !== 'environment';
-  const style = isLocal && isFrontFacing ? { transform: 'rotateY(180deg)' } : {};
+  const isClip = track.name.includes('clip');
+  const classes = useStyles();
 
-  return <Video ref={ref} style={style} />;
+  return <video className={`${classes.VideoBase} ${isClip ? classes.VideoClip : ''}`} ref={ref} />;
 }

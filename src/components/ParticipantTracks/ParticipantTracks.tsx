@@ -37,8 +37,6 @@ export default function ParticipantTracks({
     filteredPublications = publications.filter(p => !p.trackName.includes('screen'));
   }
 
-  filteredPublications = filteredPublications.filter(p => !p.trackName.includes('clip'));
-
   return (
     <>
       {filteredPublications.map((publication, index) => (
