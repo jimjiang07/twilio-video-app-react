@@ -3,6 +3,7 @@ import { TwilioError } from 'twilio-video';
 import useFirebaseAuth from './useFirebaseAuth/useFirebaseAuth';
 import usePasscodeAuth from './usePasscodeAuth/usePasscodeAuth';
 import { User } from 'firebase';
+import useAuth0Auth from './useAuth0Auth/useAuth0Auth';
 
 export interface StateContextType {
   error: TwilioError | null;
@@ -15,6 +16,15 @@ export interface StateContextType {
   isFetching: boolean;
   activeSinkId: string;
   setActiveSinkId(sinkId: string): void;
+  isAuthenticated?: boolean;
+  loading?: boolean;
+  popupOpen?: boolean;
+  logout?(): void;
+  getIdTokenClaims?(): void;
+  loginWithRedirect?(): void;
+  getTokenSilently?(): void;
+  getTokenWithPopup?(): void;
+  handleRedirectCallback?(): void;
 }
 
 export const StateContext = createContext<StateContextType>(null!);
@@ -41,7 +51,12 @@ export default function AppStateProvider(props: React.PropsWithChildren<{}>) {
     setActiveSinkId,
   } as StateContextType;
 
-  if (process.env.REACT_APP_SET_AUTH === 'firebase') {
+  if (process.env.REACT_APP_SET_AUTH === 'auth0') {
+    contextValue = {
+      ...contextValue,
+      ...useAuth0Auth(), // eslint-disable-line react-hooks/rules-of-hooks
+    };
+  } else if (process.env.REACT_APP_SET_AUTH === 'firebase') {
     contextValue = {
       ...contextValue,
       ...useFirebaseAuth(), // eslint-disable-line react-hooks/rules-of-hooks
